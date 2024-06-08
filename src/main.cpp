@@ -1,4 +1,4 @@
-#include <net/socket.hpp>
+#include <net/raw_socket.hpp>
 
 #include <iostream>
 
@@ -6,21 +6,21 @@ using namespace net;
 
 int main(int argc, char const *argv[])
 {
-	Socket sock;
+	RawSocket sock;
 
-	if (sock.Create() != Socket::Errors::Ok)
+	if (sock.Create() != RawSocket::Errors::Ok)
 	{
 		std::cerr << "Failed to create socket." << std::endl;
 		return 1;
 	}
 
-	if (sock.Bind("0.0.0.0", 8080) != Socket::Errors::Ok)
+	if (sock.Bind("0.0.0.0", 8080) != RawSocket::Errors::Ok)
 	{
 		std::cerr << "Failed to bind socket." << std::endl;
 		return 1;
 	}
 
-	if (sock.Listen() != Socket::Errors::Ok)
+	if (sock.Listen() != RawSocket::Errors::Ok)
 	{
 		std::cerr << "Failed to listen on socket." << std::endl;
 		return 1;
@@ -30,14 +30,16 @@ int main(int argc, char const *argv[])
 
 	while (true)
 	{
-		if (sock.Accept() != Socket::Errors::Ok)
+		if (sock.Accept() != RawSocket::Errors::Ok)
 		{
 			std::cerr << "Failed to accept connection." << std::endl;
 			continue;
 		}
 
 		std::vector<uint8_t> buffer;
-		if (sock.Receive(buffer, 1024) != Socket::Errors::Ok)
+		buffer.resize(1024);
+
+		if (sock.Receive(buffer) != RawSocket::Errors::Ok)
 		{
 			std::cerr << "Failed to receive data." << std::endl;
 			sock.Close();
@@ -53,7 +55,7 @@ int main(int argc, char const *argv[])
 											  "\r\n"
 											  "Hello, world!";
 
-		if (sock.Send(response) != Socket::Errors::Ok)
+		if (sock.Send(response) != RawSocket::Errors::Ok)
 		{
 			std::cerr << "Failed to send response." << std::endl;
 		}

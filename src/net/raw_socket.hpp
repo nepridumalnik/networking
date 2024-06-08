@@ -13,7 +13,7 @@
 namespace net
 {
 
-class Socket
+class RawSocket
 {
 public:
 	/// @brief Action errors
@@ -22,31 +22,31 @@ public:
 		/// @brief No errors
 		Ok,
 
-		/// @brief Socket initialize error
+		/// @brief RawSocket initialize error
 		InitError,
 
-		/// @brief Socket initialize error
+		/// @brief RawSocket initialize error
 		CreateError,
 
-		/// @brief Socket binding error
+		/// @brief RawSocket binding error
 		BindError,
 
-		/// @brief Socket binding error
+		/// @brief RawSocket binding error
 		ListenError,
 
-		/// @brief Socket accept error
+		/// @brief RawSocket accept error
 		AcceptError,
 
-		/// @brief Socket connection error
+		/// @brief RawSocket connection error
 		ConnectError,
 
-		/// @brief Socket send data error
+		/// @brief RawSocket send data error
 		SendError,
 
-		/// @brief Socket receive data error
+		/// @brief RawSocket receive data error
 		ReceiveError,
 
-		/// @brief Socket close error
+		/// @brief RawSocket close error
 		CloseError,
 	};
 
@@ -60,8 +60,8 @@ public:
 	};
 
 public:
-	Socket();
-	~Socket();
+	RawSocket();
+	~RawSocket();
 
 	Errors Create(Protocols proto = Protocols::Tcp);
 	Errors Bind(const std::string_view ip, uint16_t port);
@@ -71,12 +71,12 @@ public:
 	Errors Send(const std::vector<uint8_t> &data);
 	Errors Send(const std::string_view data);
 	Errors Send(const char *data, size_t size);
-	Errors Receive(std::vector<uint8_t> &buffer, size_t size);
+	Errors Receive(std::vector<uint8_t> &buffer);
 	Errors Close();
 
 private:
-	Socket(const Socket &) = delete;
-	Socket(const Socket &&) = delete;
+	RawSocket(const RawSocket &) = delete;
+	RawSocket(const RawSocket &&) = delete;
 
 private:
 #if defined(WIN32)
