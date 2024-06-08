@@ -61,6 +61,7 @@ public:
 
 public:
 	RawSocket();
+	RawSocket(RawSocket &&);
 	~RawSocket();
 
 	Errors Create(Protocols proto = Protocols::Tcp);
@@ -76,7 +77,6 @@ public:
 
 private:
 	RawSocket(const RawSocket &) = delete;
-	RawSocket(const RawSocket &&) = delete;
 
 private:
 #if defined(WIN32)

@@ -1,4 +1,5 @@
 #include <net/raw_socket.hpp>
+#include <net/socket_factory.hpp>
 
 #include <iostream>
 
@@ -6,30 +7,12 @@ using namespace net;
 
 int main(int argc, char const *argv[])
 {
-	RawSocket sock;
-
-	if (sock.Create() != RawSocket::Errors::Ok)
-	{
-		std::cerr << "Failed to create socket." << std::endl;
-		return 1;
-	}
-
-	if (sock.Bind("0.0.0.0", 8080) != RawSocket::Errors::Ok)
-	{
-		std::cerr << "Failed to bind socket." << std::endl;
-		return 1;
-	}
-
-	if (sock.Listen() != RawSocket::Errors::Ok)
-	{
-		std::cerr << "Failed to listen on socket." << std::endl;
-		return 1;
-	}
-
-	std::cout << "Server is listening on port 8080..." << std::endl;
+	SocketFactory factory;
 
 	while (true)
 	{
+		RawSocket sock = factory.SpawnServer(RawSocket::Protocols::Tcp, "0.0.0.0", 8080);
+
 		if (sock.Accept() != RawSocket::Errors::Ok)
 		{
 			std::cerr << "Failed to accept connection." << std::endl;
@@ -59,10 +42,7 @@ int main(int argc, char const *argv[])
 		{
 			std::cerr << "Failed to send response." << std::endl;
 		}
-
-		sock.Close();
 	}
 
-	sock.Close();
 	return 0;
 }

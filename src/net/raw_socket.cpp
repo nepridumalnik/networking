@@ -25,6 +25,12 @@ RawSocket::RawSocket() : sock_(INVALID_SOCKET)
 {
 }
 
+RawSocket::RawSocket(RawSocket &&other)
+{
+	sock_ = other.sock_;
+	other.sock_ = INVALID_SOCKET;
+}
+
 RawSocket::~RawSocket()
 {
 	Close();
