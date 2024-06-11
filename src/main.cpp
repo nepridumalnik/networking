@@ -32,11 +32,15 @@ int main(int argc, char const *argv[])
 		std::string request(buffer.begin(), buffer.end());
 		std::cout << "Received request: " << request << std::endl;
 
-		constexpr std::string_view response = "HTTP/1.1 200 OK\r\n"
-											  "Content-Type: text/html\r\n"
-											  "Content-Length: 13\r\n"
-											  "\r\n"
-											  "Hello, world!";
+		static size_t counter = 0;
+
+		const std::string response = "HTTP/1.1 200 OK\n"
+									 "Content-Type: text/html\n"
+									 "\n"
+									 "Hello, world: " +
+									 std::to_string(counter++);
+
+		std::cout << "response: " << response << std::endl;
 
 		if (sock.Send(response) != RawSocket::Errors::Ok)
 		{
