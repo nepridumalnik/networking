@@ -25,13 +25,13 @@ public:
 		/// @brief RawSocket initialize error
 		InitError,
 
-		/// @brief RawSocket initialize error
+		/// @brief RawSocket creation error
 		CreateError,
 
 		/// @brief RawSocket binding error
 		BindError,
 
-		/// @brief RawSocket binding error
+		/// @brief RawSocket listening error
 		ListenError,
 
 		/// @brief RawSocket accept error
@@ -82,7 +82,6 @@ private:
 private:
 #if defined(WIN32)
 	SOCKET sock_;
-	SOCKET receive_;
 #endif
 };
 
