@@ -11,11 +11,6 @@ void TestClient()
 {
 	std::this_thread::sleep_for(std::chrono::microseconds(300));
 	RawSocket client;
-	if (client.Create(RawSocket::Protocols::Tcp) != RawSocket::Errors::Ok)
-	{
-		std::cerr << "Failed to create client socket." << std::endl;
-		return;
-	}
 	if (client.Connect("127.0.0.1", 8080) != RawSocket::Errors::Ok)
 	{
 		std::cerr << "Failed to connect to server." << std::endl;

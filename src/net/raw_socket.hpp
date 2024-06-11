@@ -50,6 +50,7 @@ public:
 		CloseError,
 	};
 
+	/// @brief Protocols
 	enum Protocols : uint8_t
 	{
 		/// @brief TCP protocol
@@ -57,15 +58,37 @@ public:
 
 		/// @brief UDP protocol
 		Udp,
+
+		/// @brief IP protocol
+		Ip,
+	};
+
+	/// @brief Address family
+	enum AddressFamily : uint8_t
+	{
+		/// @brief IPv4 address family
+		Ipv4,
+
+		/// @brief IPv6 address family
+		Ipv6,
 	};
 
 public:
-	RawSocket();
+	/// @brief Constructor
+	RawSocket(Protocols proto = Protocols::Tcp, AddressFamily family = AddressFamily::Ipv4);
+
+	/// @brief Constructor
+	/// @param other Other socket;
+	/// @return Referense
 	RawSocket &operator=(RawSocket &&other) noexcept;
+
+	/// @brief Constructor
+	/// @param other Other socket;
 	RawSocket(RawSocket &&other) noexcept;
+
+	/// @brief Destructor
 	~RawSocket();
 
-	Errors Create(Protocols proto = Protocols::Tcp);
 	Errors Bind(const std::string_view ip, uint16_t port);
 	Errors Listen(int backlog = SOMAXCONN);
 	Errors Accept();
@@ -77,10 +100,25 @@ public:
 	Errors Close();
 
 private:
+	/// @brief Creates a new socket
+	/// @param proto Protocol
+	/// @param family Address family
+	/// @return Enum error
+	Errors create(Protocols proto, AddressFamily family);
+
+	/// @brief Constructor
+	/// @param other Other socket;
 	RawSocket(const RawSocket &) = delete;
+
+	/// @brief Create socket
+	/// @param protocol Protocol
+	/// @param family Adddress family
+	/// @return Socket descriptor
+	SOCKET createSocket(Protocols protocol, AddressFamily family);
 
 private:
 #if defined(WIN32)
+	/// @brief Socket descriptor
 	SOCKET sock_;
 #endif
 };

@@ -13,11 +13,6 @@ RawSocket SocketFactory::SpawnServer(const std::string_view addr, uint16_t port)
 {
 	RawSocket sock;
 
-	if (sock.Create(proto_) != RawSocket::Errors::Ok)
-	{
-		throw std::runtime_error{"Failed to create socket"};
-	}
-
 	if (sock.Bind(addr, port) != RawSocket::Errors::Ok)
 	{
 		throw std::runtime_error{"Failed to create socket"};

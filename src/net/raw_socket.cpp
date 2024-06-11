@@ -24,12 +24,17 @@ IPPROTO ProtocolsToIpProto(net::RawSocket::Protocols protocol)
 namespace net
 {
 
-RawSocket::RawSocket() : sock_{INVALID_SOCKET}
+RawSocket::RawSocket(Protocols proto, AddressFamily family) : sock_{INVALID_SOCKET}
 {
 	WSADATA wsaData{};
 	if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
 	{
 		throw std::runtime_error("WSAStartup failed");
+	}
+
+	if (create(proto, family) != Errors::Ok)
+	{
+		throw std::runtime_error("Socket init failed");
 	}
 }
 
@@ -55,9 +60,29 @@ RawSocket::~RawSocket()
 	WSACleanup();
 }
 
-RawSocket::Errors RawSocket::Create(Protocols proto)
+SOCKET RawSocket::createSocket(Protocols protocol, AddressFamily family)
 {
-	sock_ = socket(AF_INET, (proto == Protocols::Tcp) ? SOCK_STREAM : SOCK_DGRAM, ProtocolsToIpProto(proto));
+	const auto afinet = (family == AddressFamily::Ipv4 ? AF_INET : AF_INET6);
+
+	switch (protocol)
+	{
+	case Protocols::Tcp:
+		return socket(afinet, SOCK_STREAM, IPPROTO::IPPROTO_TCP);
+
+	case Protocols::Udp:
+		return socket(afinet, SOCK_DGRAM, IPPROTO::IPPROTO_UDP);
+
+	case Protocols::Ip:
+		return socket(afinet, SOCK_STREAM, IPPROTO_IP);
+	}
+
+	return INVALID_SOCKET;
+}
+
+RawSocket::Errors RawSocket::create(Protocols proto, AddressFamily family)
+{
+	sock_ = createSocket(proto, family);
+
 	if (sock_ == INVALID_SOCKET)
 	{
 		return RawSocket::Errors::CreateError;
