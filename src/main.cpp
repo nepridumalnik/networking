@@ -10,7 +10,7 @@ void TestClient()
 {
 	std::this_thread::sleep_for(std::chrono::microseconds(300));
 	RawSocket client;
-	if (client.Connect("127.0.0.1", 8080) != RawSocket::Errors::Ok)
+	if (client.Connect("127.0.0.1", 8080) != SocketErrors::Ok)
 	{
 		std::cerr << "Failed to connect to server." << std::endl;
 		return;
@@ -18,7 +18,7 @@ void TestClient()
 
 	size_t sent = 0;
 	// Send a simple HTTP request
-	if (client.Send("GET / HTTP/1.1\nHost: 127.0.0.1\n\n", sent) != RawSocket::Errors::Ok)
+	if (client.Send("GET / HTTP/1.1\nHost: 127.0.0.1\n\n", sent) != SocketErrors::Ok)
 	{
 		std::cerr << "Failed to send data to server." << std::endl;
 		return;
@@ -28,7 +28,7 @@ void TestClient()
 
 	std::vector<uint8_t> buffer;
 	buffer.resize(1024);
-	if (client.Receive(buffer) != RawSocket::Errors::Ok)
+	if (client.Receive(buffer) != SocketErrors::Ok)
 	{
 		std::cerr << "Failed to receive data from server." << std::endl;
 		return;
@@ -47,7 +47,7 @@ int main(int argc, char const *argv[])
 		RawSocket sock;
 		sock.Listen("0.0.0.0", 8080);
 
-		if (sock.Accept() != RawSocket::Errors::Ok)
+		if (sock.Accept() != SocketErrors::Ok)
 		{
 			std::cerr << "Failed to accept connection." << std::endl;
 			continue;
@@ -56,7 +56,7 @@ int main(int argc, char const *argv[])
 		std::vector<uint8_t> buffer;
 		buffer.resize(1024);
 
-		if (sock.Receive(buffer) != RawSocket::Errors::Ok)
+		if (sock.Receive(buffer) != SocketErrors::Ok)
 		{
 			std::cerr << "Failed to receive data." << std::endl;
 			sock.Close();
@@ -77,7 +77,7 @@ int main(int argc, char const *argv[])
 		std::cout << "response: " << response << std::endl;
 
 		size_t sent = 0;
-		if (sock.Send(response, sent) != RawSocket::Errors::Ok)
+		if (sock.Send(response, sent) != SocketErrors::Ok)
 		{
 			std::cerr << "Failed to send response." << std::endl;
 		}
