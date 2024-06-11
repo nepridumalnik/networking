@@ -24,7 +24,7 @@ RawSocket SocketFactory::SpawnServer(RawSocket::Protocols, const std::string_vie
 		throw std::runtime_error{"Failed to create socket"};
 	}
 
-	return std::move(sock);
+	return sock;
 }
 
 } // namespace net

@@ -61,7 +61,8 @@ public:
 
 public:
 	RawSocket();
-	RawSocket(RawSocket &&);
+	RawSocket &operator=(RawSocket &&other) noexcept;
+	RawSocket(RawSocket &&other) noexcept;
 	~RawSocket();
 
 	Errors Create(Protocols proto = Protocols::Tcp);
@@ -81,6 +82,7 @@ private:
 private:
 #if defined(WIN32)
 	SOCKET sock_;
+	SOCKET receive_;
 #endif
 };
 
