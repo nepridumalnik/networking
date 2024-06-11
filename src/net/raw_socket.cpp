@@ -91,7 +91,7 @@ RawSocket::Errors RawSocket::create(Protocols proto, AddressFamily family)
 	return RawSocket::Errors::Ok;
 }
 
-RawSocket::Errors RawSocket::Bind(const std::string_view ip, uint16_t port)
+RawSocket::Errors RawSocket::Listen(const std::string_view ip, uint16_t port, int backlog)
 {
 	sockaddr_in service{};
 	service.sin_family = AF_INET;
@@ -107,11 +107,7 @@ RawSocket::Errors RawSocket::Bind(const std::string_view ip, uint16_t port)
 		Close();
 		return RawSocket::Errors::BindError;
 	}
-	return RawSocket::Errors::Ok;
-}
 
-RawSocket::Errors RawSocket::Listen(int backlog)
-{
 	if (listen(sock_, backlog) == SOCKET_ERROR)
 	{
 		Close();

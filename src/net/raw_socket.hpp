@@ -89,14 +89,49 @@ public:
 	/// @brief Destructor
 	~RawSocket();
 
-	Errors Bind(const std::string_view ip, uint16_t port);
-	Errors Listen(int backlog = SOMAXCONN);
+	/// @brief Listen
+	/// @param ip Socket address
+	/// @param port Socket port
+	/// @param backlog Maximum number of pending connections
+	/// @return Enum error
+	Errors Listen(const std::string_view ip, uint16_t port, int backlog = SOMAXCONN);
+
+	/// @brief Accept connection
+	/// @return Enum error
 	Errors Accept();
+
+	/// @brief Connect socket to address
+	/// @param ip Socket address
+	/// @param port Socket port
+	/// @return Enum error
 	Errors Connect(const std::string_view ip, uint16_t port);
+
+	/// @brief Send data
+	/// @param data data Data to send
+	/// @param sent Number of bytes sent
+	/// @return Enum error
 	Errors Send(const std::vector<uint8_t> &data, size_t &sent);
+
+	/// @brief Receive data
+	/// @param data data Data received
+	/// @param sent Number of bytes received
+	/// @return Enum error
 	Errors Send(const std::string_view data, size_t &sent);
+
+	/// @brief Receive data
+	/// @param data data Data received
+	/// @param size Number of bytes to send
+	/// @param sent Number of bytes that were received
+	/// @return Enum error
 	Errors Send(const char *data, size_t size, size_t &sent);
+
+	/// @brief Receive data
+	/// @param buffer buffer Data received
+	/// @return Enum error
 	Errors Receive(std::vector<uint8_t> &buffer);
+
+	/// @brief Close socket
+	/// @return Enum error
 	Errors Close();
 
 private:

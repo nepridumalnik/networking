@@ -2,7 +2,6 @@ set(TARGET networking)
 
 set(SOURCES
     net/raw_socket.cpp
-    net/socket_factory.cpp
 )
 
 set(INCLUDE

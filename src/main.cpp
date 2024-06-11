@@ -1,5 +1,4 @@
 #include <net/raw_socket.hpp>
-#include <net/socket_factory.hpp>
 
 #include <chrono>
 #include <iostream>
@@ -41,12 +40,12 @@ void TestClient()
 
 int main(int argc, char const *argv[])
 {
-	SocketFactory tcpFactory{RawSocket::Protocols::Tcp};
 	std::thread th = std::thread(&TestClient);
 
 	while (true)
 	{
-		RawSocket sock = tcpFactory.SpawnServer("0.0.0.0", 8080);
+		RawSocket sock;
+		sock.Listen("0.0.0.0", 8080);
 
 		if (sock.Accept() != RawSocket::Errors::Ok)
 		{
