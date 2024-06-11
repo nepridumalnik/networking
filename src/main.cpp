@@ -7,11 +7,11 @@ using namespace net;
 
 int main(int argc, char const *argv[])
 {
-	SocketFactory factory;
+	SocketFactory tcpFactory{RawSocket::Protocols::Tcp};
 
 	while (true)
 	{
-		RawSocket sock = factory.SpawnServer(RawSocket::Protocols::Tcp, "0.0.0.0", 8080);
+		RawSocket sock = tcpFactory.SpawnServer("0.0.0.0", 8080);
 
 		if (sock.Accept() != RawSocket::Errors::Ok)
 		{

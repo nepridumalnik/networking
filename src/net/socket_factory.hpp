@@ -8,7 +8,12 @@ namespace net
 class SocketFactory
 {
 public:
-	RawSocket SpawnServer(RawSocket::Protocols, const std::string_view addr, uint16_t port) const;
+	SocketFactory(RawSocket::Protocols proto);
+
+	RawSocket SpawnServer(const std::string_view addr, uint16_t port) const;
+
+private:
+	RawSocket::Protocols proto_;
 };
 
 } // namespace net

@@ -5,11 +5,15 @@
 namespace net
 {
 
-RawSocket SocketFactory::SpawnServer(RawSocket::Protocols, const std::string_view addr, uint16_t port) const
+SocketFactory::SocketFactory(RawSocket::Protocols proto) : proto_{proto}
+{
+}
+
+RawSocket SocketFactory::SpawnServer(const std::string_view addr, uint16_t port) const
 {
 	RawSocket sock;
 
-	if (sock.Create() != RawSocket::Errors::Ok)
+	if (sock.Create(proto_) != RawSocket::Errors::Ok)
 	{
 		throw std::runtime_error{"Failed to create socket"};
 	}
