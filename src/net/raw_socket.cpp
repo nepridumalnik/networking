@@ -25,6 +25,11 @@ namespace net
 
 RawSocket::RawSocket() : sock_{INVALID_SOCKET}, receive_{INVALID_SOCKET}
 {
+	WSADATA wsaData{};
+	if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
+	{
+		throw std::runtime_error("WSAStartup failed");
+	}
 }
 
 RawSocket::RawSocket(RawSocket &&other) noexcept : sock_{other.sock_}, receive_{other.receive_}
@@ -49,6 +54,7 @@ RawSocket &RawSocket::operator=(RawSocket &&other) noexcept
 RawSocket::~RawSocket()
 {
 	Close();
+	WSACleanup();
 }
 
 RawSocket::Errors RawSocket::Create(Protocols proto)
@@ -105,8 +111,6 @@ RawSocket::Errors RawSocket::Accept()
 	receive_ = accept(sock_, nullptr, nullptr);
 	if (receive_ == INVALID_SOCKET)
 	{
-		printf("accept failed with error: %d\n", WSAGetLastError());
-
 		Close();
 		return RawSocket::Errors::AcceptError;
 	}
@@ -133,30 +137,34 @@ RawSocket::Errors RawSocket::Connect(const std::string_view ip, uint16_t port)
 	return RawSocket::Errors::Ok;
 }
 
-RawSocket::Errors RawSocket::Send(const std::vector<uint8_t> &data)
+RawSocket::Errors RawSocket::Send(const std::vector<uint8_t> &data, size_t &sent)
 {
-	return Send(reinterpret_cast<const char *>(data.data()), data.size());
+	return Send(reinterpret_cast<const char *>(data.data()), data.size(), sent);
 }
 
-RawSocket::Errors RawSocket::Send(const std::string_view data)
+RawSocket::Errors RawSocket::Send(const std::string_view data, size_t &sent)
 {
-	return Send(data.data(), data.size());
+	return Send(data.data(), data.size(), sent);
 }
 
-RawSocket::Errors RawSocket::Send(const char *data, size_t size)
+RawSocket::Errors RawSocket::Send(const char *data, size_t size, size_t &sent)
 {
-	const int result = send(receive_, data, static_cast<int>(size), 0);
+	const int result = send(receive_ == SOCKET_ERROR ? sock_ : receive_, data, static_cast<int>(size), 0);
 	if (result == SOCKET_ERROR || result != size)
 	{
+		sent = 0;
 		return RawSocket::Errors::SendError;
 	}
+
+	sent = result;
 
 	return RawSocket::Errors::Ok;
 }
 
 RawSocket::Errors RawSocket::Receive(std::vector<uint8_t> &buffer)
 {
-	const int result = recv(receive_, reinterpret_cast<char *>(buffer.data()), static_cast<int>(buffer.size()), 0);
+	const int result = recv(receive_ == SOCKET_ERROR ? sock_ : receive_, reinterpret_cast<char *>(buffer.data()),
+							static_cast<int>(buffer.size()), 0);
 
 	if (result == SOCKET_ERROR)
 	{
@@ -186,8 +194,6 @@ RawSocket::Errors RawSocket::Close()
 		}
 		receive_ = INVALID_SOCKET;
 	}
-
-	WSACleanup();
 
 	return RawSocket::Errors::Ok;
 }

@@ -70,9 +70,9 @@ public:
 	Errors Listen(int backlog = SOMAXCONN);
 	Errors Accept();
 	Errors Connect(const std::string_view ip, uint16_t port);
-	Errors Send(const std::vector<uint8_t> &data);
-	Errors Send(const std::string_view data);
-	Errors Send(const char *data, size_t size);
+	Errors Send(const std::vector<uint8_t> &data, size_t &sent);
+	Errors Send(const std::string_view data, size_t &sent);
+	Errors Send(const char *data, size_t size, size_t &sent);
 	Errors Receive(std::vector<uint8_t> &buffer);
 	Errors Close();
 
