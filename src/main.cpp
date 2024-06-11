@@ -34,11 +34,11 @@ int main(int argc, char const *argv[])
 
 		static size_t counter = 0;
 
+		const std::string body = "Hello, world: " + std::to_string(counter++);
 		const std::string response = "HTTP/1.1 200 OK\n"
 									 "Content-Type: text/html\n"
-									 "\n"
-									 "Hello, world: " +
-									 std::to_string(counter++);
+									 "Content-Length: " +
+									 std::to_string(body.size()) + "\n\n" + body;
 
 		std::cout << "response: " << response << std::endl;
 

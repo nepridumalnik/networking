@@ -27,8 +27,7 @@ RawSocket::RawSocket() : sock_{INVALID_SOCKET}, receive_{INVALID_SOCKET}
 {
 }
 
-RawSocket::RawSocket(RawSocket &&other) noexcept
-	: sock_{other.sock_}, receive_{other.receive_}
+RawSocket::RawSocket(RawSocket &&other) noexcept : sock_{other.sock_}, receive_{other.receive_}
 {
 	other.sock_ = INVALID_SOCKET;
 	other.receive_ = INVALID_SOCKET;
@@ -147,7 +146,7 @@ RawSocket::Errors RawSocket::Send(const std::string_view data)
 RawSocket::Errors RawSocket::Send(const char *data, size_t size)
 {
 	const int result = send(receive_, data, static_cast<int>(size), 0);
-	if (result == SOCKET_ERROR)
+	if (result == SOCKET_ERROR || result != size)
 	{
 		return RawSocket::Errors::SendError;
 	}
