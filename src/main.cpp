@@ -45,7 +45,11 @@ int main(int argc, char const *argv[])
 	while (true)
 	{
 		Socket sock;
-		sock.Listen("0.0.0.0", 8080);
+		if (sock.Listen("0.0.0.0", 8080) != SocketErrors::Ok)
+		{
+			std::cerr << "Failed to listen to address." << std::endl;
+			continue;
+		}
 
 		if (sock.Accept() != SocketErrors::Ok)
 		{

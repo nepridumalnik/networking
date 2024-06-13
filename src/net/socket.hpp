@@ -95,6 +95,10 @@ private:
 	/// @return Socket descriptor
 	SOCKET createSocket(Protocols protocol, AddressFamily family);
 
+	/// @brief Socket is busy
+	/// @return True, if busy
+	bool busy() const;
+
 private:
 #if defined(WIN32)
 	/// @brief Socket descriptor
