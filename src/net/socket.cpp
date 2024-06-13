@@ -177,7 +177,7 @@ SocketErrors Socket::Receive(std::vector<uint8_t> &buffer)
 			break;
 		}
 
-		buffer.insert(buffer.end(), chunk.begin(), chunk.end());
+		buffer.insert(buffer.end(), chunk.begin(), chunk.begin() + bytesReceived);
 		totalBytesReceived += bytesReceived;
 
 		if (bytesReceived < chunk.size())
