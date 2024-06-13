@@ -35,10 +35,10 @@ void TestClient()
 	}
 
 	std::cout << "Received " << buffer.size() << " bytes." << std::endl;
-	std::cout << reinterpret_cast<const char *>(buffer.data()) << std::endl;
+	std::cout << reinterpret_cast<const char*>(buffer.data()) << std::endl;
 }
 
-int main(int argc, char const *argv[])
+int main(int argc, char const* argv[])
 {
 	std::thread th = std::thread(&TestClient);
 
@@ -75,8 +75,8 @@ int main(int argc, char const *argv[])
 		const std::string body = "Hello, world: " + std::to_string(counter++);
 		const std::string response = "HTTP/1.1 200 OK\n"
 									 "Content-Type: text/html\n"
-									 "Content-Length: " +
-									 std::to_string(body.size()) + "\n\n" + body;
+									 "Content-Length: "
+									 + std::to_string(body.size()) + "\n\n" + body;
 
 		std::cout << "response: " << response << std::endl;
 

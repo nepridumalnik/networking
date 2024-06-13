@@ -4,17 +4,36 @@
 #include <array>
 #include <stdexcept>
 
+#if defined(WIN32)
+#include <winsock2.h>
+#include <ws2tcpip.h>
+
+constexpr auto WrongSocket = INVALID_SOCKET;
+constexpr auto SocketError = SOCKET_ERROR;
+#else
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <unistd.h>
+
+constexpr int WrongSocket = -1;
+constexpr int SocketError = -1;
+#endif
+
 namespace net
 {
+
 const size_t net::Socket::chunkSize_ = 1024;
 
-Socket::Socket(Protocols proto, AddressFamily family) : sock_{INVALID_SOCKET}
+Socket::Socket(Protocols proto, AddressFamily family)
+	 : sock_{WrongSocket}
 {
+#if defined(WIN32)
 	WSADATA wsaData{};
 	if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
 	{
 		throw std::runtime_error("WSAStartup failed");
 	}
+#endif
 
 	if (create(proto, family) != SocketErrors::Ok)
 	{
@@ -22,52 +41,56 @@ Socket::Socket(Protocols proto, AddressFamily family) : sock_{INVALID_SOCKET}
 	}
 }
 
-Socket::Socket(Socket &&other) noexcept : sock_{other.sock_}
+Socket::Socket(Socket&& other) noexcept
+	 : sock_{other.sock_}
 {
-	other.sock_ = INVALID_SOCKET;
+	other.sock_ = WrongSocket;
 }
 
-Socket &Socket::operator=(Socket &&other) noexcept
+Socket& Socket::operator=(Socket&& other) noexcept
 {
 	if (this != &other)
 	{
 		Close();
 		sock_ = other.sock_;
-		other.sock_ = INVALID_SOCKET;
+		other.sock_ = WrongSocket;
 	}
+
 	return *this;
 }
 
 Socket::~Socket()
 {
 	Close();
+#if defined(WIN32)
 	WSACleanup();
+#endif
 }
 
-SOCKET Socket::createSocket(Protocols protocol, AddressFamily family)
+int Socket::createSocket(Protocols protocol, AddressFamily family)
 {
 	const auto afinet = (family == AddressFamily::Ipv4 ? AF_INET : AF_INET6);
 
 	switch (protocol)
 	{
-	case Protocols::Tcp:
-		return socket(afinet, SOCK_STREAM, IPPROTO::IPPROTO_TCP);
+		case Protocols::Tcp:
+			return socket(afinet, SOCK_STREAM, IPPROTO_TCP);
 
-	case Protocols::Udp:
-		return socket(afinet, SOCK_DGRAM, IPPROTO::IPPROTO_UDP);
+		case Protocols::Udp:
+			return socket(afinet, SOCK_DGRAM, IPPROTO_UDP);
 
-	case Protocols::Ip:
-		return socket(afinet, SOCK_STREAM, IPPROTO_IP);
+		case Protocols::Ip:
+			return socket(afinet, SOCK_STREAM, IPPROTO_IP);
 	}
 
-	return INVALID_SOCKET;
+	return WrongSocket;
 }
 
 SocketErrors Socket::create(Protocols proto, AddressFamily family)
 {
 	sock_ = createSocket(proto, family);
 
-	if (sock_ == INVALID_SOCKET)
+	if (sock_ == WrongSocket)
 	{
 		return SocketErrors::CreateError;
 	}
@@ -86,13 +109,13 @@ SocketErrors Socket::Listen(const std::string_view ip, uint16_t port, int backlo
 	}
 	service.sin_port = htons(port);
 
-	if (bind(sock_, (sockaddr *)&service, sizeof(service)) == SOCKET_ERROR)
+	if (bind(sock_, (sockaddr*)&service, sizeof(service)) == SocketError)
 	{
 		Close();
 		return SocketErrors::BindError;
 	}
 
-	if (listen(sock_, backlog) == SOCKET_ERROR)
+	if (listen(sock_, backlog) == SocketError)
 	{
 		Close();
 		return SocketErrors::ListenError;
@@ -102,13 +125,13 @@ SocketErrors Socket::Listen(const std::string_view ip, uint16_t port, int backlo
 
 SocketErrors Socket::Accept()
 {
-	SOCKET new_sock = accept(sock_, nullptr, nullptr);
-	if (new_sock == INVALID_SOCKET)
+	int new_sock = accept(sock_, nullptr, nullptr);
+	if (new_sock == WrongSocket)
 	{
 		return SocketErrors::AcceptError;
 	}
 
-	closesocket(sock_);
+	Close();
 	sock_ = new_sock;
 
 	return SocketErrors::Ok;
@@ -125,7 +148,7 @@ SocketErrors Socket::Connect(const std::string_view ip, uint16_t port)
 	}
 	clientService.sin_port = htons(port);
 
-	if (connect(sock_, (sockaddr *)&clientService, sizeof(clientService)) == SOCKET_ERROR)
+	if (connect(sock_, (sockaddr*)&clientService, sizeof(clientService)) == SocketError)
 	{
 		Close();
 		return SocketErrors::ConnectError;
@@ -134,20 +157,20 @@ SocketErrors Socket::Connect(const std::string_view ip, uint16_t port)
 	return SocketErrors::Ok;
 }
 
-SocketErrors Socket::Send(const std::vector<uint8_t> &data, size_t &sent)
+SocketErrors Socket::Send(const std::vector<uint8_t>& data, size_t& sent)
 {
-	return Send(reinterpret_cast<const char *>(data.data()), data.size(), sent);
+	return Send(reinterpret_cast<const char*>(data.data()), data.size(), sent);
 }
 
-SocketErrors Socket::Send(const std::string_view data, size_t &sent)
+SocketErrors Socket::Send(const std::string_view data, size_t& sent)
 {
 	return Send(data.data(), data.size(), sent);
 }
 
-SocketErrors Socket::Send(const char *data, size_t size, size_t &sent)
+SocketErrors Socket::Send(const char* data, size_t size, size_t& sent)
 {
 	const int result = send(sock_, data, static_cast<int>(size), 0);
-	if (result == SOCKET_ERROR)
+	if (result == SocketError)
 	{
 		sent = 0;
 		return SocketErrors::SendError;
@@ -158,7 +181,7 @@ SocketErrors Socket::Send(const char *data, size_t size, size_t &sent)
 	return SocketErrors::Ok;
 }
 
-SocketErrors Socket::Receive(std::vector<uint8_t> &buffer)
+SocketErrors Socket::Receive(std::vector<uint8_t>& buffer)
 {
 	buffer.clear();
 
@@ -167,8 +190,8 @@ SocketErrors Socket::Receive(std::vector<uint8_t> &buffer)
 
 	while (true)
 	{
-		int bytesReceived = recv(sock_, reinterpret_cast<char *>(chunk.data()), static_cast<int>(chunk.size()), 0);
-		if (bytesReceived == SOCKET_ERROR)
+		int bytesReceived = recv(sock_, reinterpret_cast<char*>(chunk.data()), static_cast<int>(chunk.size()), 0);
+		if (bytesReceived == SocketError)
 		{
 			return SocketErrors::ReceiveError;
 		}
@@ -191,19 +214,17 @@ SocketErrors Socket::Receive(std::vector<uint8_t> &buffer)
 	return SocketErrors::Ok;
 }
 
-SocketErrors Socket::Close()
+void Socket::Close()
 {
-	if (sock_ != INVALID_SOCKET)
-	{
-		if (closesocket(sock_) == SOCKET_ERROR)
-		{
-			return SocketErrors::CloseError;
-		}
+#if defined(WIN32)
+	closesocket(sock_);
 
-		sock_ = INVALID_SOCKET;
-	}
+	sock_ = WrongSocket;
+#else
+	close(sock_);
 
-	return SocketErrors::Ok;
+	sock_ = -1;
+#endif
 }
 
 } // namespace net
