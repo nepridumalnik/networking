@@ -1,4 +1,4 @@
-#include <net/raw_socket.hpp>
+#include <net/socket.hpp>
 
 #include <iostream>
 #include <stdexcept>
@@ -6,7 +6,7 @@
 namespace net
 {
 
-RawSocket::RawSocket(Protocols proto, AddressFamily family) : sock_{INVALID_SOCKET}
+Socket::Socket(Protocols proto, AddressFamily family) : sock_{INVALID_SOCKET}
 {
 	WSADATA wsaData{};
 	if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
@@ -20,12 +20,12 @@ RawSocket::RawSocket(Protocols proto, AddressFamily family) : sock_{INVALID_SOCK
 	}
 }
 
-RawSocket::RawSocket(RawSocket &&other) noexcept : sock_{other.sock_}
+Socket::Socket(Socket &&other) noexcept : sock_{other.sock_}
 {
 	other.sock_ = INVALID_SOCKET;
 }
 
-RawSocket &RawSocket::operator=(RawSocket &&other) noexcept
+Socket &Socket::operator=(Socket &&other) noexcept
 {
 	if (this != &other)
 	{
@@ -36,13 +36,13 @@ RawSocket &RawSocket::operator=(RawSocket &&other) noexcept
 	return *this;
 }
 
-RawSocket::~RawSocket()
+Socket::~Socket()
 {
 	Close();
 	WSACleanup();
 }
 
-SOCKET RawSocket::createSocket(Protocols protocol, AddressFamily family)
+SOCKET Socket::createSocket(Protocols protocol, AddressFamily family)
 {
 	const auto afinet = (family == AddressFamily::Ipv4 ? AF_INET : AF_INET6);
 
@@ -61,7 +61,7 @@ SOCKET RawSocket::createSocket(Protocols protocol, AddressFamily family)
 	return INVALID_SOCKET;
 }
 
-SocketErrors RawSocket::create(Protocols proto, AddressFamily family)
+SocketErrors Socket::create(Protocols proto, AddressFamily family)
 {
 	sock_ = createSocket(proto, family);
 
@@ -73,7 +73,7 @@ SocketErrors RawSocket::create(Protocols proto, AddressFamily family)
 	return SocketErrors::Ok;
 }
 
-SocketErrors RawSocket::Listen(const std::string_view ip, uint16_t port, int backlog)
+SocketErrors Socket::Listen(const std::string_view ip, uint16_t port, int backlog)
 {
 	sockaddr_in service{};
 	service.sin_family = AF_INET;
@@ -98,7 +98,7 @@ SocketErrors RawSocket::Listen(const std::string_view ip, uint16_t port, int bac
 	return SocketErrors::Ok;
 }
 
-SocketErrors RawSocket::Accept()
+SocketErrors Socket::Accept()
 {
 	SOCKET new_sock = accept(sock_, nullptr, nullptr);
 	if (new_sock == INVALID_SOCKET)
@@ -112,7 +112,7 @@ SocketErrors RawSocket::Accept()
 	return SocketErrors::Ok;
 }
 
-SocketErrors RawSocket::Connect(const std::string_view ip, uint16_t port)
+SocketErrors Socket::Connect(const std::string_view ip, uint16_t port)
 {
 	sockaddr_in clientService;
 	clientService.sin_family = AF_INET;
@@ -132,17 +132,17 @@ SocketErrors RawSocket::Connect(const std::string_view ip, uint16_t port)
 	return SocketErrors::Ok;
 }
 
-SocketErrors RawSocket::Send(const std::vector<uint8_t> &data, size_t &sent)
+SocketErrors Socket::Send(const std::vector<uint8_t> &data, size_t &sent)
 {
 	return Send(reinterpret_cast<const char *>(data.data()), data.size(), sent);
 }
 
-SocketErrors RawSocket::Send(const std::string_view data, size_t &sent)
+SocketErrors Socket::Send(const std::string_view data, size_t &sent)
 {
 	return Send(data.data(), data.size(), sent);
 }
 
-SocketErrors RawSocket::Send(const char *data, size_t size, size_t &sent)
+SocketErrors Socket::Send(const char *data, size_t size, size_t &sent)
 {
 	const int result = send(sock_, data, static_cast<int>(size), 0);
 	if (result == SOCKET_ERROR)
@@ -156,7 +156,7 @@ SocketErrors RawSocket::Send(const char *data, size_t size, size_t &sent)
 	return SocketErrors::Ok;
 }
 
-SocketErrors RawSocket::Receive(std::vector<uint8_t> &buffer)
+SocketErrors Socket::Receive(std::vector<uint8_t> &buffer)
 {
 	const int result = recv(sock_, reinterpret_cast<char *>(buffer.data()), static_cast<int>(buffer.size()), 0);
 
@@ -169,7 +169,7 @@ SocketErrors RawSocket::Receive(std::vector<uint8_t> &buffer)
 	return SocketErrors::Ok;
 }
 
-SocketErrors RawSocket::Close()
+SocketErrors Socket::Close()
 {
 	if (sock_ != INVALID_SOCKET)
 	{

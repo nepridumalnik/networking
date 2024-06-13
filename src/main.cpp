@@ -1,4 +1,4 @@
-#include <net/raw_socket.hpp>
+#include <net/socket.hpp>
 
 #include <chrono>
 #include <iostream>
@@ -9,7 +9,7 @@ using namespace net;
 void TestClient()
 {
 	std::this_thread::sleep_for(std::chrono::microseconds(300));
-	RawSocket client;
+	Socket client;
 	if (client.Connect("127.0.0.1", 8080) != SocketErrors::Ok)
 	{
 		std::cerr << "Failed to connect to server." << std::endl;
@@ -44,7 +44,7 @@ int main(int argc, char const *argv[])
 
 	while (true)
 	{
-		RawSocket sock;
+		Socket sock;
 		sock.Listen("0.0.0.0", 8080);
 
 		if (sock.Accept() != SocketErrors::Ok)

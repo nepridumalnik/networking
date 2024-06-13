@@ -11,31 +11,31 @@ enum SocketErrors : uint8_t
 	/// @brief No errors
 	Ok,
 
-	/// @brief RawSocket initialize error
+	/// @brief Socket initialize error
 	InitError,
 
-	/// @brief RawSocket creation error
+	/// @brief Socket creation error
 	CreateError,
 
-	/// @brief RawSocket binding error
+	/// @brief Socket binding error
 	BindError,
 
-	/// @brief RawSocket listening error
+	/// @brief Socket listening error
 	ListenError,
 
-	/// @brief RawSocket accept error
+	/// @brief Socket accept error
 	AcceptError,
 
-	/// @brief RawSocket connection error
+	/// @brief Socket connection error
 	ConnectError,
 
-	/// @brief RawSocket send data error
+	/// @brief Socket send data error
 	SendError,
 
-	/// @brief RawSocket receive data error
+	/// @brief Socket receive data error
 	ReceiveError,
 
-	/// @brief RawSocket close error
+	/// @brief Socket close error
 	CloseError,
 };
 

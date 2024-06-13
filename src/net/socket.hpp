@@ -15,23 +15,23 @@
 namespace net
 {
 
-class RawSocket
+class Socket
 {
 public:
 	/// @brief Constructor
-	RawSocket(Protocols proto = Protocols::Tcp, AddressFamily family = AddressFamily::Ipv4);
+	Socket(Protocols proto = Protocols::Tcp, AddressFamily family = AddressFamily::Ipv4);
 
 	/// @brief Constructor
 	/// @param other Other socket;
 	/// @return Referense
-	RawSocket &operator=(RawSocket &&other) noexcept;
+	Socket &operator=(Socket &&other) noexcept;
 
 	/// @brief Constructor
 	/// @param other Other socket;
-	RawSocket(RawSocket &&other) noexcept;
+	Socket(Socket &&other) noexcept;
 
 	/// @brief Destructor
-	~RawSocket();
+	~Socket();
 
 	/// @brief Listen
 	/// @param ip Socket address
@@ -87,7 +87,7 @@ private:
 
 	/// @brief Constructor
 	/// @param other Other socket;
-	RawSocket(const RawSocket &) = delete;
+	Socket(const Socket &) = delete;
 
 	/// @brief Create socket
 	/// @param protocol Protocol
