@@ -1,10 +1,12 @@
 #include <net/socket.hpp>
 
 #include <iostream>
+#include <array>
 #include <stdexcept>
 
 namespace net
 {
+const size_t net::Socket::chunkSize_ = 1024;
 
 Socket::Socket(Protocols proto, AddressFamily family) : sock_{INVALID_SOCKET}
 {
@@ -63,11 +65,6 @@ SOCKET Socket::createSocket(Protocols protocol, AddressFamily family)
 
 SocketErrors Socket::create(Protocols proto, AddressFamily family)
 {
-	if(busy())
-	{
-		return SocketErrors::Busy;
-	}
-
 	sock_ = createSocket(proto, family);
 
 	if (sock_ == INVALID_SOCKET)
@@ -80,11 +77,6 @@ SocketErrors Socket::create(Protocols proto, AddressFamily family)
 
 SocketErrors Socket::Listen(const std::string_view ip, uint16_t port, int backlog)
 {
-	if(busy())
-	{
-		return SocketErrors::Busy;
-	}
-
 	sockaddr_in service{};
 	service.sin_family = AF_INET;
 	if (inet_pton(AF_INET, ip.data(), &service.sin_addr) <= 0)
@@ -110,11 +102,6 @@ SocketErrors Socket::Listen(const std::string_view ip, uint16_t port, int backlo
 
 SocketErrors Socket::Accept()
 {
-	if(busy())
-	{
-		return SocketErrors::Busy;
-	}
-
 	SOCKET new_sock = accept(sock_, nullptr, nullptr);
 	if (new_sock == INVALID_SOCKET)
 	{
@@ -129,11 +116,6 @@ SocketErrors Socket::Accept()
 
 SocketErrors Socket::Connect(const std::string_view ip, uint16_t port)
 {
-	if(busy())
-	{
-		return SocketErrors::Busy;
-	}
-
 	sockaddr_in clientService;
 	clientService.sin_family = AF_INET;
 	if (inet_pton(AF_INET, ip.data(), &clientService.sin_addr) <= 0)
@@ -164,11 +146,6 @@ SocketErrors Socket::Send(const std::string_view data, size_t &sent)
 
 SocketErrors Socket::Send(const char *data, size_t size, size_t &sent)
 {
-	if(busy())
-	{
-		return SocketErrors::Busy;
-	}
-
 	const int result = send(sock_, data, static_cast<int>(size), 0);
 	if (result == SOCKET_ERROR)
 	{
@@ -183,19 +160,34 @@ SocketErrors Socket::Send(const char *data, size_t size, size_t &sent)
 
 SocketErrors Socket::Receive(std::vector<uint8_t> &buffer)
 {
-	if(busy())
+	buffer.clear();
+
+	std::array<char, chunkSize_> chunk;
+	size_t totalBytesReceived = 0;
+
+	while (true)
 	{
-		return SocketErrors::Busy;
+		int bytesReceived = recv(sock_, reinterpret_cast<char *>(chunk.data()), static_cast<int>(chunk.size()), 0);
+		if (bytesReceived == SOCKET_ERROR)
+		{
+			return SocketErrors::ReceiveError;
+		}
+		else if (bytesReceived == 0)
+		{
+			break;
+		}
+
+		buffer.insert(buffer.end(), chunk.begin(), chunk.end());
+		totalBytesReceived += bytesReceived;
+
+		if (bytesReceived < chunk.size())
+		{
+			break;
+		}
 	}
 
-	const int result = recv(sock_, reinterpret_cast<char *>(buffer.data()), static_cast<int>(buffer.size()), 0);
+	buffer.resize(totalBytesReceived);
 
-	if (result == SOCKET_ERROR)
-	{
-		return SocketErrors::ReceiveError;
-	}
-
-	buffer.resize(result);
 	return SocketErrors::Ok;
 }
 
@@ -212,11 +204,6 @@ SocketErrors Socket::Close()
 	}
 
 	return SocketErrors::Ok;
-}
-
-bool Socket::busy() const
-{
-	return sock_ != INVALID_SOCKET;
 }
 
 } // namespace net

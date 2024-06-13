@@ -37,9 +37,6 @@ enum SocketErrors : uint8_t
 
 	/// @brief Socket close error
 	CloseError,
-
-	/// @brief Socket is busy
-	Busy,
 };
 
 /// @brief Protocols
