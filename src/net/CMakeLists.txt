@@ -1,3 +1,5 @@
+add_compile_definitions(LIB_EXPORTS)
+
 set(TARGET networking)
 
 set(SOURCES
@@ -12,5 +14,5 @@ if(WIN32)
     )
 endif()
 
-add_library(${TARGET} ${SOURCES})
+add_library(${TARGET} SHARED ${SOURCES})
 target_link_libraries(${TARGET} PRIVATE ${LIBRARIES})

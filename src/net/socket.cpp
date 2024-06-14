@@ -5,7 +5,6 @@
 #include <stdexcept>
 
 #if defined(WIN32)
-#include <winsock2.h>
 #include <ws2tcpip.h>
 
 constexpr auto WrongSocket = INVALID_SOCKET;
@@ -25,7 +24,7 @@ namespace net
 const size_t net::Socket::chunkSize_ = 1024;
 
 Socket::Socket(Protocols proto, AddressFamily family)
-	 : sock_{WrongSocket}
+	: sock_{WrongSocket}
 {
 #if defined(WIN32)
 	WSADATA wsaData{};
@@ -42,7 +41,7 @@ Socket::Socket(Protocols proto, AddressFamily family)
 }
 
 Socket::Socket(Socket&& other) noexcept
-	 : sock_{other.sock_}
+	: sock_{other.sock_}
 {
 	other.sock_ = WrongSocket;
 }

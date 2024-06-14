@@ -2,6 +2,8 @@
 
 #include <net/types.hpp>
 
+#include <export/export_symbols.hpp>
+
 #include <cstdint>
 #include <string>
 #include <string_view>
@@ -22,63 +24,63 @@ class Socket
 {
 public:
 	/// @brief Constructor
-	Socket(Protocols proto = Protocols::Tcp, AddressFamily family = AddressFamily::Ipv4);
+	DLLAPI Socket(Protocols proto = Protocols::Tcp, AddressFamily family = AddressFamily::Ipv4);
 
 	/// @brief Constructor
 	/// @param other Other socket;
 	/// @return Referense
-	Socket& operator=(Socket&& other) noexcept;
+	DLLAPI Socket& operator=(Socket&& other) noexcept;
 
 	/// @brief Constructor
 	/// @param other Other socket;
-	Socket(Socket&& other) noexcept;
+	DLLAPI Socket(Socket&& other) noexcept;
 
 	/// @brief Destructor
-	~Socket();
+	DLLAPI ~Socket();
 
 	/// @brief Listen
 	/// @param ip Socket address
 	/// @param port Socket port
 	/// @param backlog Maximum number of pending connections
 	/// @return Enum error
-	SocketErrors Listen(const std::string_view ip, uint16_t port, int backlog = SOMAXCONN);
+	DLLAPI SocketErrors Listen(const std::string_view ip, uint16_t port, int backlog = SOMAXCONN);
 
 	/// @brief Accept connection
 	/// @return Enum error
-	SocketErrors Accept();
+	DLLAPI SocketErrors Accept();
 
 	/// @brief Connect socket to address
 	/// @param ip Socket address
 	/// @param port Socket port
 	/// @return Enum error
-	SocketErrors Connect(const std::string_view ip, uint16_t port);
+	DLLAPI SocketErrors Connect(const std::string_view ip, uint16_t port);
 
 	/// @brief Send data
 	/// @param data data Data to send
 	/// @param sent Number of bytes sent
 	/// @return Enum error
-	SocketErrors Send(const std::vector<uint8_t>& data, size_t& sent);
+	DLLAPI SocketErrors Send(const std::vector<uint8_t>& data, size_t& sent);
 
 	/// @brief Receive data
 	/// @param data data Data received
 	/// @param sent Number of bytes received
 	/// @return Enum error
-	SocketErrors Send(const std::string_view data, size_t& sent);
+	DLLAPI SocketErrors Send(const std::string_view data, size_t& sent);
 
 	/// @brief Receive data
 	/// @param data data Data received
 	/// @param size Number of bytes to send
 	/// @param sent Number of bytes that were received
 	/// @return Enum error
-	SocketErrors Send(const char* data, size_t size, size_t& sent);
+	DLLAPI SocketErrors Send(const char* data, size_t size, size_t& sent);
 
 	/// @brief Receive data
 	/// @param buffer buffer Data received
 	/// @return Enum error
-	SocketErrors Receive(std::vector<uint8_t>& buffer);
+	DLLAPI SocketErrors Receive(std::vector<uint8_t>& buffer);
 
 	/// @brief Close socket
-	void Close();
+	DLLAPI void Close();
 
 private:
 	/// @brief Creates a new socket
