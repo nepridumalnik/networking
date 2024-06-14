@@ -79,6 +79,11 @@ public:
 	/// @return Enum error
 	DLLAPI SocketErrors Receive(std::vector<uint8_t>& buffer);
 
+	/// @brief Receive data
+	/// @param buffer buffer Data received
+	/// @return Enum error
+	DLLAPI SocketErrors Receive(std::string& buffer);
+
 	/// @brief Close socket
 	DLLAPI void Close();
 
@@ -102,9 +107,6 @@ private:
 private:
 	/// @brief Socket descriptor
 	SocketHandle sock_;
-
-	/// @brief Chunk for receiving data
-	static const size_t chunkSize_;
 };
 
 } // namespace net

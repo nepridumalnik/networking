@@ -18,10 +18,51 @@ constexpr int WrongSocket = -1;
 constexpr int SocketError = -1;
 #endif
 
-namespace net
+namespace
 {
 
-const size_t net::Socket::chunkSize_ = 1024;
+constexpr size_t ChunkSize = 1024;
+
+/// @brief Template variant of Receive function
+/// @tparam C container
+/// @param buffer Reference to container
+/// @param sock Socket handle
+/// @return Enum error
+template<typename C>
+net::SocketErrors TReceive(C& buffer, SocketHandle sock)
+{
+	buffer.clear();
+
+	std::array<char, ChunkSize> chunk;
+
+	do
+	{
+		int bytesReceived = recv(sock, reinterpret_cast<char*>(chunk.data()), static_cast<int>(chunk.size()), 0);
+		if (bytesReceived == SocketError)
+		{
+			return net::SocketErrors::ReceiveError;
+		}
+		else if (bytesReceived == 0)
+		{
+			break;
+		}
+
+		buffer.insert(buffer.end(), chunk.begin(), chunk.begin() + bytesReceived);
+
+		if (bytesReceived < chunk.size())
+		{
+			break;
+		}
+	}
+	while (true);
+
+	return net::SocketErrors::Ok;
+}
+
+} // namespace
+
+namespace net
+{
 
 Socket::Socket(Protocols proto, AddressFamily family)
 	: sock_{WrongSocket}
@@ -182,35 +223,12 @@ SocketErrors Socket::Send(const char* data, size_t size, size_t& sent)
 
 SocketErrors Socket::Receive(std::vector<uint8_t>& buffer)
 {
-	buffer.clear();
+	return TReceive<std::vector<uint8_t>>(buffer, sock_);
+}
 
-	std::array<char, chunkSize_> chunk;
-	size_t totalBytesReceived = 0;
-
-	while (true)
-	{
-		int bytesReceived = recv(sock_, reinterpret_cast<char*>(chunk.data()), static_cast<int>(chunk.size()), 0);
-		if (bytesReceived == SocketError)
-		{
-			return SocketErrors::ReceiveError;
-		}
-		else if (bytesReceived == 0)
-		{
-			break;
-		}
-
-		buffer.insert(buffer.end(), chunk.begin(), chunk.begin() + bytesReceived);
-		totalBytesReceived += bytesReceived;
-
-		if (bytesReceived < chunk.size())
-		{
-			break;
-		}
-	}
-
-	buffer.resize(totalBytesReceived);
-
-	return SocketErrors::Ok;
+SocketErrors Socket::Receive(std::string& buffer)
+{
+	return TReceive<std::string>(buffer, sock_);
 }
 
 void Socket::Close()
