@@ -10,4 +10,5 @@ list(APPEND CMAKE_MODULE_PATH
 
 include(conan)
 
+include_directories(${CMAKE_SOURCE_DIR}/src)
 add_subdirectory(src)
