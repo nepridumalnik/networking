@@ -58,7 +58,6 @@ int main(int argc, char const* argv[])
 		}
 
 		std::vector<uint8_t> buffer;
-		buffer.resize(1024);
 
 		if (sock.Receive(buffer) != SocketErrors::Ok)
 		{
