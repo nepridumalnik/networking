@@ -7,3 +7,4 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR}/generators)
 
 find_package(GTest REQUIRED)
+include_directories(${GTest_INCLUDE_DIRS})
