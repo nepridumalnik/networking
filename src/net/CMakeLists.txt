@@ -4,6 +4,8 @@ set(TARGET networking)
 
 set(SOURCES
     socket.cpp
+    http/http_header.cpp
+    http/http_request.hpp
 )
 
 set(LIBRARIES)
